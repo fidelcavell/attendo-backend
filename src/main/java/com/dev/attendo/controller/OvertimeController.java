@@ -19,7 +19,7 @@ public class OvertimeController {
     OvertimeApplicationService overtimeService;
 
     @GetMapping("/{overtimeId}")
-    public ResponseEntity<?> getOvertimeApplicationById(@PathVariable Long overtimeId) {
+    public ResponseEntity<?> getOvertimeApplication(@PathVariable Long overtimeId) {
         return ResponseEntity.ok(overtimeService.getOvertimeApplicationById(overtimeId));
     }
 
@@ -42,7 +42,7 @@ public class OvertimeController {
     }
 
     @GetMapping("/requested/{userId}")
-    public ResponseEntity<?> getAllRequestedOvertimeApplicationByUser(
+    public ResponseEntity<?> getAllRequestedOvertimeApplication(
             @PathVariable Long userId,
             @RequestParam(name = "store") Long storeId,
             @RequestParam(defaultValue = "PENDING", required = false) String status,

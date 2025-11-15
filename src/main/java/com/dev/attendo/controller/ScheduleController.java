@@ -18,25 +18,25 @@ public class ScheduleController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/store/{storeId}")
-    ResponseEntity<?> getAllSchedule(@PathVariable Long storeId) {
+    public ResponseEntity<?> getAllSchedule(@PathVariable Long storeId) {
         return ResponseEntity.ok(scheduleService.getAllSchedule(storeId));
     }
 
     @PostMapping("/{storeId}")
-    ResponseEntity<?> addSchedule(@PathVariable Long storeId,@RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
+    public ResponseEntity<?> addSchedule(@PathVariable Long storeId,@RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
         scheduleService.addSchedule(storeId, currentLoggedIn, scheduleDTO);
         return ResponseEntity.ok(new MessageResponse(true, "New Schedule has been added!"));
     }
 
     @PutMapping("/{scheduleId}")
-    ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId, @RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
+    public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId, @RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
         scheduleService.updateSchedule(scheduleId, currentLoggedIn, scheduleDTO);
         return ResponseEntity.ok(new MessageResponse(true, "Schedule has been updated!"));
     }
 
     @PreAuthorize("hasRole('OWNER')")
     @DeleteMapping("/{scheduleId}")
-    ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId) {
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId) {
         scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok(new MessageResponse(true, "Schedule has been deleted!"));
     }

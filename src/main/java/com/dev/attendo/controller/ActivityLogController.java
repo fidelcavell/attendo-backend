@@ -18,7 +18,7 @@ public class ActivityLogController {
     ActivityLogService activityLogService;
 
     @GetMapping
-    ResponseEntity<?> getAllActivityLogByUserId(
+    ResponseEntity<?> getAllActivityLog(
             @RequestParam(name = "store") Long storeId,
             @RequestParam(name = "method") String method,
             @RequestParam(name = "startDate", required = false) LocalDate startDate,

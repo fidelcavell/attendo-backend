@@ -21,7 +21,7 @@ public class LeaveApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private ApprovalStatusEnum status;

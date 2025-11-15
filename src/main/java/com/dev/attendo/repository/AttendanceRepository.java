@@ -59,14 +59,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
             "AND a.user.id = :userId")
     Optional<Integer> getTotalOvertimePayByYearAndMonth(Long userId, int month, int year);
 
-    @Query("SELECT COUNT(a) FROM Attendance a " +
-            "WHERE YEAR(a.clockIn) = :year " +
-            "AND MONTH(a.clockIn) = :month " +
-            "AND a.user.id = :userId " +
-            "AND a.type = 'OVERTIME' " +
-            "AND a.status IN ('PRESENT', 'LATE')")
-    Optional<Integer> countOvertimeByYearAndMonth(Long userId, Integer month, int year);
-
     @Query("SELECT a from Attendance a JOIN a.overtimeApplication o " +
             "WHERE a.user.id = :userId " +
             "AND a.type = 'OVERTIME' " +

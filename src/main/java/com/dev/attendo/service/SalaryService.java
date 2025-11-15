@@ -12,8 +12,6 @@ public interface SalaryService {
 
     int getCurrentTotalSalary(Long userId, Long storeId, Long loanId);
 
-    List<Salary> getAllSalaryHistoryByStoreAndMonthYear(Long userId, Long storeId, int year, String month);
-
     Map<String, Integer> getMonthlySalarySummaryByUserAndStoreAndMonthYear(Long userId, Long storeId, int month, int year);
 
     void addNewSalary(Long userId, String currentLoggedIn, int amount, int targetMonth, int targetYear);

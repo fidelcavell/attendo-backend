@@ -76,17 +76,6 @@ public class LoanServiceImpl implements LoanService {
         return loanPagination;
     }
 
-    @Override
-    public Loan getLoanByUserAndStoreAndDate(Long userId, Long storeId, LocalDate expectedDate) {
-        User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
-
-        Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
-
-        return loanRepository.getLoanByUserAndStoreAndDate(selectedUser.getId(), selectedStore.getId(), expectedDate).orElseThrow(() -> new ResourceNotFoundException("Loan on date: " + expectedDate + ", with user id: " + userId + " is not found!"));
-    }
-
     @Transactional
     @Override
     public void addLoan(Long userId, String currentLoggedIn, int newLoanAmount) {
@@ -177,20 +166,6 @@ public class LoanServiceImpl implements LoanService {
 
         } catch (Exception e) {
             throw new InternalServerErrorException("Failed to update loan!");
-        }
-    }
-
-    @Transactional
-    @Override
-    public void removeLoan(Long loanId) {
-        Loan selectedLoan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loan with id: " + loanId + " is not found!"));
-
-        try {
-            loanRepository.delete(selectedLoan);
-
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to remove loan!");
         }
     }
 }

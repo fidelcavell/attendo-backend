@@ -52,12 +52,12 @@ public class AttendanceController {
     }
 
     @GetMapping("/daily-info/{userId}")
-    public ResponseEntity<?> getTodayDailyAttendanceByUser(@PathVariable Long userId) {
+    public ResponseEntity<?> getTodayDailyAttendance(@PathVariable Long userId) {
         return ResponseEntity.ok(attendanceService.getTodayDailyAttendanceInfo(userId));
     }
 
     @GetMapping("/overtime-info/{userId}")
-    public ResponseEntity<?> getTodayOvertimeScheduleByUser(@PathVariable Long userId) {
+    public ResponseEntity<?> getTodayOvertimeSchedule(@PathVariable Long userId) {
         return ResponseEntity.ok(attendanceService.getTodayOvertimeSchedule(userId));
     }
 
@@ -74,11 +74,7 @@ public class AttendanceController {
     public ResponseEntity<?> getAttendancesByMonthAndYear(
             @PathVariable Long userId,
             @RequestParam int month,
-            @RequestParam int year,
-            @RequestParam(defaultValue = "0", required = false) Integer pageNumber,
-            @RequestParam(defaultValue = "10", required = false) Integer pageSize,
-            @RequestParam(defaultValue = "clockIn", required = false) String sortBy,
-            @RequestParam(defaultValue = "asc", required = false) String sortOrder
+            @RequestParam int year
     ) {
         return ResponseEntity.ok(attendanceService.getAttendanceByMonthAndYear(userId, month, year));
     }

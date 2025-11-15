@@ -84,17 +84,6 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public List<Salary> getAllSalaryHistoryByStoreAndMonthYear(Long userId, Long storeId, int year, String month) {
-        User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
-        Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
-        Integer selectedMonth = month.equalsIgnoreCase("all") ? null : Integer.parseInt(month);
-
-        return salaryRepository.findSalaryHistoryByStoreAndMonthYear(selectedUser.getId(), selectedStore.getId(), year, selectedMonth);
-    }
-
-    @Override
     public Map<String, Integer> getMonthlySalarySummaryByUserAndStoreAndMonthYear(Long userId, Long storeId, int month, int year) {
         User selectedUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));

@@ -8,8 +8,6 @@ public interface ScheduleService {
 
     List<ScheduleDTO> getAllSchedule(Long storeId);
 
-    ScheduleDTO getSchedule(Long scheduleId);
-
     void addSchedule(Long storeId, String currentLoggedIn, ScheduleDTO scheduleDTO);
 
     void updateSchedule(Long scheduleId, String currentLoggedIn, ScheduleDTO scheduleDTO);

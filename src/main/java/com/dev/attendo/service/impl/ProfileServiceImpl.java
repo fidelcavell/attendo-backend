@@ -44,9 +44,6 @@ public class ProfileServiceImpl implements ProfileService {
     @Autowired
     ActivityLogService activityLogService;
 
-    @Autowired
-    StoreRepository storeRepository;
-
     @Override
     public ProfileDTO getProfile(Long profileId) {
         Profile selectedProfile = profileRepository.findById(profileId)

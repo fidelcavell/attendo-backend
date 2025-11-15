@@ -2,9 +2,7 @@ package com.dev.attendo.service.impl;
 
 import com.dev.attendo.dtos.audit.ActivityLogDTO;
 import com.dev.attendo.dtos.audit.ActivityLogPagination;
-import com.dev.attendo.exception.BadRequestException;
 import com.dev.attendo.exception.InternalServerErrorException;
-import com.dev.attendo.exception.ResourceNotFoundException;
 import com.dev.attendo.model.ActivityLog;
 import com.dev.attendo.model.User;
 import com.dev.attendo.repository.ActivityLogRepository;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -31,16 +28,6 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
     @Autowired
     ModelMapper modelMapper;
-
-    @Override
-    public ActivityLogDTO getActivityLogById(Long activityLogId) {
-        ActivityLog selectedActivityLog = activityLogRepository.findById(activityLogId)
-                .orElseThrow(() -> new ResourceNotFoundException("Activity Log with id: " + activityLogId + " is not found!"));
-        ActivityLogDTO activityLogDTO = modelMapper.map(selectedActivityLog, ActivityLogDTO.class);
-        activityLogDTO.setCreatedBy(selectedActivityLog.getUser().getUsername());
-        activityLogDTO.setCreatedOn(selectedActivityLog.getCreatedDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-        return activityLogDTO;
-    }
 
     @Override
     public ActivityLogPagination getAllActivityLog(Long storeId, String keyword, String actionMethod, LocalDate startDate, LocalDate endDate, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {

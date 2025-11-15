@@ -52,13 +52,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleRepository.findByStoreId(store.getId()).stream().map(workSchedule -> modelMapper.map(workSchedule, ScheduleDTO.class)).toList();
     }
 
-    @Override
-    public ScheduleDTO getSchedule(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule with id: " + scheduleId + " is not found!"));
-        return modelMapper.map(schedule, ScheduleDTO.class);
-    }
-
     @Transactional
     @Override
     public void addSchedule(Long storeId, String currentLoggedIn, ScheduleDTO scheduleDTO) {

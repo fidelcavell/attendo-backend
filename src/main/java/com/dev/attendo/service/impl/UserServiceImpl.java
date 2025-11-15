@@ -222,9 +222,9 @@ public class UserServiceImpl implements UserService {
 
         if (selectedUser.getStore() != null) {
             if (!selectedUser.getStore().getId().equals(storeId)) {
-                throw new BadRequestException("User with username: " + username + " is already associated with another toko!");
+                throw new BadRequestException("User with username: " + username + " is already associated with another store!");
             }
-            throw new BadRequestException("User with username: " + username + " is already part of this toko!");
+            throw new BadRequestException("User with username: " + username + " is already part of this store!");
         }
 
         if (!selectedStore.isActive()) {

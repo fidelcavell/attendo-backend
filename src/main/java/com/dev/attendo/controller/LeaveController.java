@@ -20,12 +20,12 @@ public class LeaveController {
     LeaveApplicationService leaveApplicationService;
 
     @GetMapping("/{leaveId}")
-    public ResponseEntity<?> getLeaveApplicationById(@PathVariable Long leaveId) {
+    public ResponseEntity<?> getLeaveApplication(@PathVariable Long leaveId) {
         return ResponseEntity.ok(leaveApplicationService.getLeaveApplication(leaveId));
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllLeaveApplicationByStatusAndType(
+    public ResponseEntity<?> getAllLeaveApplication(
             @RequestParam(defaultValue = "", required = false) String keyword,
             @RequestParam(name = "currentLoggedIn") String currentUser,
             @RequestParam(name = "store") Long storeId,
@@ -43,7 +43,7 @@ public class LeaveController {
     }
 
     @GetMapping("/requested/{userId}")
-    public ResponseEntity<?> getAllRequestedLeaveApplicationByUserId(
+    public ResponseEntity<?> getAllRequestedLeaveApplication(
             @PathVariable Long userId,
             @RequestParam(name = "store") Long storeId,
             @RequestParam(defaultValue = "PENDING", required = false) String status,

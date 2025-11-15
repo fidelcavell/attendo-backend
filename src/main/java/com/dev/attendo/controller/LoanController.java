@@ -20,7 +20,7 @@ public class LoanController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/history/{userId}")
-    public ResponseEntity<?> getAllLoanHistoryByUserAndStoreAndMonthYear(
+    public ResponseEntity<?> getAllLoanHistoryByUserAndStore(
             @PathVariable Long userId,
             @RequestParam(name = "store") Long storeId,
             @RequestParam int month,
@@ -33,15 +33,6 @@ public class LoanController {
         LoanPagination loanPagination = loanService.getAllHistoryLoanByUserAndStoreAndMonthYear(userId, storeId, month, year, pageNumber, pageSize, sortBy, sortOrder);
         return ResponseEntity.ok(loanPagination);
     }
-
-//    @GetMapping("/{userId}")
-//    public ResponseEntity<?> getLoanByUserAndStoreAndDate(
-//            @PathVariable Long userId,
-//            @RequestParam(name = "store") Long storeId,
-//            @RequestParam LocalDate expectedDate
-//    ) {
-//        return ResponseEntity.ok(loanService.getLoanByUserAndStoreAndDate(userId, storeId, expectedDate));
-//    }
 
     @PostMapping("/{userId}")
     public ResponseEntity<?> addLoan(@PathVariable Long userId, @RequestParam String currentLoggedIn, @RequestParam int newLoanAmount) {
