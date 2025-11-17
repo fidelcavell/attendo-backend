@@ -89,20 +89,4 @@ public class Store {
     // Relation: User and Loan
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private List<Loan> loanList;
-
-
-    // For Initial Data purpose: LATER WILL BE DELETED!
-    public Store(String name, String address, double lat, double lng, double radius, int breakDuration, int maxBreakCount, int currentBreakCount, int lateClockInPenaltyAmount, int lateBreakOutPenaltyAmount, double multiplierOvertime) {
-        this.name = name;
-        this.address = address;
-        this.lat = lat;
-        this.lng = lng;
-        this.radius = radius;
-        this.breakDuration = breakDuration;
-        this.maxBreakCount = maxBreakCount;
-        this.currentBreakCount = currentBreakCount;
-        this.lateClockInPenaltyAmount = lateClockInPenaltyAmount;
-        this.lateBreakOutPenaltyAmount = lateBreakOutPenaltyAmount;
-        this.multiplierOvertime = multiplierOvertime;
-    }
 }

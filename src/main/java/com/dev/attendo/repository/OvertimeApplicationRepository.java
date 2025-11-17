@@ -38,7 +38,7 @@ public interface OvertimeApplicationRepository extends JpaRepository<OvertimeApp
             "WHERE o.user.store.id = :storeId " +
             "AND o.status = 'APPROVED' " +
             "AND o.overtimeDate BETWEEN :startDate AND :endDate " +
-            "GROUP BY MONTH(o.overtimeDate)")
+            "GROUP BY YEAR(o.overtimeDate), MONTH(o.overtimeDate)")
     List<Object[]> getOvertimeCountSummary(Long storeId, LocalDate startDate, LocalDate endDate);
 
 }
