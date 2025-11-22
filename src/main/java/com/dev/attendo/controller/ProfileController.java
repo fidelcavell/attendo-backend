@@ -4,7 +4,6 @@ import com.dev.attendo.dtos.profile.ProfileDTO;
 import com.dev.attendo.dtos.profile.ProfilePagination;
 import com.dev.attendo.security.response.MessageResponse;
 import com.dev.attendo.service.ProfileService;
-import com.dev.attendo.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

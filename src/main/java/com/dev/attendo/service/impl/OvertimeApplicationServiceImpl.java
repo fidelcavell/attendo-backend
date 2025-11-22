@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public OvertimeDTO getOvertimeApplicationById(Long overtimeId) {
         OvertimeApplication selectedOvertimeApplication = overtimeRepository.findById(overtimeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Overtime ticket with id: " + overtimeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Overtime application with id: " + overtimeId + " is not found!"));
         OvertimeDTO overtimeTicketDTO = modelMapper.map(selectedOvertimeApplication, OvertimeDTO.class);
         overtimeTicketDTO.setAssignedTime(selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB - " + selectedOvertimeApplication.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB");
         overtimeTicketDTO.setIssuedBy(selectedOvertimeApplication.getUser().getUsername());
@@ -147,7 +146,7 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
             overtimeRepository.save(overtimeApplication);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new overtime ticket!");
+            throw new InternalServerErrorException("Failed to add new overtime application!");
         }
     }
 

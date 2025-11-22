@@ -1,13 +1,11 @@
 package com.dev.attendo.dtos.profile;
 
 import com.dev.attendo.utils.enums.GenderEnum;
-import com.dev.attendo.utils.enums.MarriedStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor

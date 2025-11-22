@@ -65,7 +65,7 @@ public class OvertimeController {
             @RequestBody OvertimeDTO overtimeDTO
     ) {
         overtimeService.addNewOvertimeApplication(userId, scheduleId, overtimeDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "New Overtime Ticket has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "New Overtime Application has been added!"));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
@@ -76,7 +76,7 @@ public class OvertimeController {
             @RequestParam(name = "status") String approvalStatus
     ) {
         overtimeService.updateOvertimeApplication(overtimeId, approverName, approvalStatus);
-        return ResponseEntity.ok(new MessageResponse(true, "Overtime Ticket has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Overtime Application has been updated!"));
     }
 
     @DeleteMapping("/{overtimeId}")

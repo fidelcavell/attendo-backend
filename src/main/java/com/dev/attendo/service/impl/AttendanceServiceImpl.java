@@ -85,7 +85,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Calculate and compare distance between user's location with store location and store radius.
         double calculateInMeters = GeolocationUtils.calculateDistance(lat, lng, selectedStore.getLat(), selectedStore.getLng());
         if (calculateInMeters > selectedStore.getRadius()) {
-            throw new BadRequestException("Clocked-in failed: You are outside the allowed area! " + calculateInMeters + " " + selectedStore.getRadius());
+            throw new BadRequestException("Clocked-in failed: You are outside the allowed area!");
         }
 
         try {
@@ -121,6 +121,20 @@ public class AttendanceServiceImpl implements AttendanceService {
                     selectedAttendance.setDescription("-");
                 }
             }
+
+            // In case if user do clock out, but they don't do break out (they do break in before)
+            if (selectedAttendance.getBreakIn() != null && selectedAttendance.getBreakOut() == null) {
+                long breakDuration = Duration.between(selectedAttendance.getBreakIn(), currentDateTime).toMinutes();
+                if (breakDuration > (selectedStore.getBreakDuration() + selectedOvertimeApplication.getLateTolerance())) {
+                    selectedAttendance.setDeductionAmount(selectedAttendance.getDeductionAmount() + selectedStore.getLateBreakOutPenaltyAmount());
+                    selectedAttendance.setLateInMinutes((int) (selectedAttendance.getLateInMinutes() + (breakDuration - selectedStore.getBreakDuration())));
+                    selectedAttendance.setDescription(Objects.toString(selectedAttendance.getDescription(), "") + selectedOvertimeApplication.getUser().getProfile().getName() + " is break more then " + selectedStore.getBreakDuration() + " minutes!\n\n");
+                }
+                selectedAttendance.setBreakOut(currentDateTime);
+
+                selectedStore.setCurrentBreakCount(selectedStore.getCurrentBreakCount() - 1);
+                storeRepository.save(selectedStore);
+            }
             attendanceRepository.save(selectedAttendance);
 
         } catch (Exception e) {
@@ -138,7 +152,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Calculate and compare distance between user's location with store location and store radius.
         double calculateInMeters = GeolocationUtils.calculateDistance(lat, lng, selectedStore.getLat(), selectedStore.getLng());
         if (calculateInMeters > selectedStore.getRadius()) {
-            throw new BadRequestException("Clocked-in failed: You are outside the allowed area! " + calculateInMeters + " " + selectedStore.getRadius());
+            throw new BadRequestException("Clocked-in failed: You are outside the allowed area!");
         }
 
         try {
@@ -166,8 +180,9 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attendance is not found!"));
         Store selectedStore = selectedAttendance.getStore();
         Schedule assignedSchedule = selectedAttendance.getUser().getProfile().getSchedule();
+        User selectedUser = selectedAttendance.getUser();
 
-        double calculateInMeters = GeolocationUtils.calculateDistance(lat, lng, selectedStore.getLat(), selectedStore.getLng()) * 1000;
+        double calculateInMeters = GeolocationUtils.calculateDistance(lat, lng, selectedStore.getLat(), selectedStore.getLng());
         if (calculateInMeters > selectedStore.getRadius()) {
             throw new BadRequestException("Clocked-out failed: You are outside the allowed area!");
         }
@@ -205,6 +220,21 @@ public class AttendanceServiceImpl implements AttendanceService {
                     selectedAttendance.setDescription("-");
                 }
             }
+
+            // In case if user do clock out, but they don't do break out (they do break in before)
+            if (selectedAttendance.getBreakIn() != null && selectedAttendance.getBreakOut() == null) {
+                long breakDuration = Duration.between(selectedAttendance.getBreakIn(), currentDateTime).toMinutes();
+                if (breakDuration > (selectedStore.getBreakDuration() + assignedSchedule.getLateTolerance())) {
+                    selectedAttendance.setDeductionAmount(selectedAttendance.getDeductionAmount() + selectedStore.getLateBreakOutPenaltyAmount());
+                    selectedAttendance.setLateInMinutes((int) (selectedAttendance.getLateInMinutes() + (breakDuration - selectedUser.getStore().getBreakDuration())));
+                    selectedAttendance.setDescription(Objects.toString(selectedAttendance.getDescription(), "") + selectedUser.getProfile().getName() + " is break more then " + selectedStore.getBreakDuration() + " minutes!\n\n");
+                }
+                selectedAttendance.setBreakOut(currentDateTime);
+
+                selectedStore.setCurrentBreakCount(selectedStore.getCurrentBreakCount() - 1);
+                storeRepository.save(selectedStore);
+            }
+
             attendanceRepository.save(selectedAttendance);
 
         } catch (Exception e) {
@@ -220,7 +250,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         Store selectedStore = selectedAttendance.getUser().getStore();
 
         if (selectedStore.getCurrentBreakCount() >= selectedStore.getMaxBreakCount()) {
-            throw new InternalServerErrorException("Employee on break is full, please wait!");
+            throw new InternalServerErrorException("Break limit reached. Please wait until another employee returns!");
         }
 
         try {

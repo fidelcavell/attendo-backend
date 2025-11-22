@@ -2,8 +2,6 @@ package com.dev.attendo.dtos.employeeLeave;
 
 import com.dev.attendo.utils.enums.ApprovalStatusEnum;
 import com.dev.attendo.utils.enums.LeaveTypeEnum;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

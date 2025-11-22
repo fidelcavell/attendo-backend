@@ -57,6 +57,7 @@ public class StoreServiceImpl implements StoreService {
     public void updateStore(Long storeId, StoreDTO storeDTO) {
         Store store = storeRepository.findByIdAndIsActive(storeId, true)
                 .orElseThrow(() -> new ResourceNotFoundException("Store is not found!"));
+        System.out.println(storeDTO);
         try {
             store.setName(storeDTO.getName());
             store.setAddress(storeDTO.getAddress());

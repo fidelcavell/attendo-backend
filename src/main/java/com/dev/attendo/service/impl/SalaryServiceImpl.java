@@ -1,5 +1,6 @@
 package com.dev.attendo.service.impl;
 
+import com.dev.attendo.exception.BadRequestException;
 import com.dev.attendo.exception.InternalServerErrorException;
 import com.dev.attendo.exception.ResourceNotFoundException;
 import com.dev.attendo.model.Loan;
@@ -126,6 +127,10 @@ public class SalaryServiceImpl implements SalaryService {
         // CHANGE
         User currentUser = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
                 .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+
+        if (amount <= 0) {
+            throw new BadRequestException("Salary amount can't be 0 or less!");
+        }
 
         LocalDate targetDate = (LocalDate.now().getMonthValue() == targetMonth) ? LocalDate.now() : LocalDate.of(targetYear, targetMonth, 1);
         try {

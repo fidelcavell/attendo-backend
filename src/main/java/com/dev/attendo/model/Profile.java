@@ -1,7 +1,6 @@
 package com.dev.attendo.model;
 
 import com.dev.attendo.utils.enums.GenderEnum;
-import com.dev.attendo.utils.enums.MarriedStatusEnum;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;

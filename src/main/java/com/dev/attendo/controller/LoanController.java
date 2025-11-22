@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-
 @RestController
 @RequestMapping("/api/loan")
 @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
