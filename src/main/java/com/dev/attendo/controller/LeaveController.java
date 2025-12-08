@@ -63,7 +63,7 @@ public class LeaveController {
     @PostMapping("/{userId}")
     public ResponseEntity<?> addNewLeaveApplication(@PathVariable Long userId, @Valid @RequestBody LeaveDTO leaveDTO) {
         leaveApplicationService.addLeaveApplication(userId, leaveDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "New Leave Application has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan perizinan baru berhasil ditambahkan!"));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
@@ -74,12 +74,12 @@ public class LeaveController {
             @RequestParam(name = "status") String approvalStatus
     ) {
         leaveApplicationService.updateLeaveApplication(leaveId, approverName, approvalStatus);
-        return ResponseEntity.ok(new MessageResponse(true, "Leave Application has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan perizinan berhasil diubah!"));
     }
 
     @DeleteMapping("/{leaveId}")
     public ResponseEntity<?> deleteLeaveApplication(@PathVariable Long leaveId) {
         leaveApplicationService.deleteLeaveApplication(leaveId);
-        return ResponseEntity.ok(new MessageResponse(true, "Leave Application has been deleted!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan perizinan berhasil dihapus!"));
     }
 }

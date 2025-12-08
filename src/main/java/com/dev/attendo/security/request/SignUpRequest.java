@@ -13,17 +13,17 @@ import java.util.Set;
 @Data
 public class SignUpRequest {
 
-    @Size(min = 3, max = 20, message = "Username must be at least 3 character!")
+    @Size(min = 3, max = 20, message = "Username harus memiliki minimal 3 karakter!")
     private String username;
 
-    @NotBlank(message = "Email must not be empty!")
     @Email
+    @NotBlank(message = "Email tidak boleh kosong!")
     private String email;
 
     @Getter
     @Setter
     private Set<String> role;
 
-    @Size(min = 8, max = 30, message = "Password must be at least 8 character!")
+    @Size(min = 8, max = 30, message = "Password harus memiliki minimal 8 karakter!")
     private String password;
 }

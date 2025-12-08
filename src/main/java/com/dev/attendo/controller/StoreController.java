@@ -26,19 +26,19 @@ public class StoreController {
     @PostMapping("/{ownerUsername}")
     public ResponseEntity<?> addStore(@PathVariable String ownerUsername, @RequestBody StoreDTO storeDTO) {
         storeService.addStore(ownerUsername, storeDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "New Store has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data toko baru berhasil ditambahkan!"));
     }
 
     @PutMapping("/{storeId}")
     public ResponseEntity<?> updateStore(@PathVariable Long storeId, @RequestBody StoreDTO storeDTO) {
         storeService.updateStore(storeId, storeDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "Store has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data toko berhasil diubah!"));
     }
 
     @PutMapping("/store-activation/{storeId}")
     public ResponseEntity<?> storeActivation(@PathVariable Long storeId) {
         storeService.storeActivation(storeId);
-        return ResponseEntity.ok(new MessageResponse(true, "Store's activation status has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Status aktivasi toko berhasil diubah!"));
     }
 
     @GetMapping("/owned/{username}")

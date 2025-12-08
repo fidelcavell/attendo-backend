@@ -19,9 +19,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class SalaryServiceImpl implements SalaryService {
@@ -47,19 +45,20 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public Salary getLatestActiveSalary(Long userId) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
-        return salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), null)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not found!"));
+        LocalDate targetDate = YearMonth.of(LocalDate.now().getYear(), LocalDate.now().getMonth()).atEndOfMonth();
+        return salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), targetDate)
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji tidak ditemukan!"));
     }
 
     @Override
     public int getCurrentTotalSalary(Long userId, Long storeId, Long loanId) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
         Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
 
         // In case of -> User want to update recently loan data due to rules that allow addLoan action can only perform once a day.
         // With this code, currentTotalSalary will show an amount before that loan added.
@@ -70,7 +69,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
 
         Salary latestSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), null)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji tidak ditemukan!"));
 
         LocalDate currentDate = LocalDate.now();
         int validAttendancesCount = attendanceRepository.countOnTimeAndLateByYearAndMonth(selectedUser.getId(), currentDate.getMonthValue(), currentDate.getYear()).orElse(0);
@@ -87,15 +86,15 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public Map<String, Integer> getMonthlySalarySummaryByUserAndStoreAndMonthYear(Long userId, Long storeId, int month, int year) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
         Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
 
         // Get used salary version in that month and year (Perhaps not latest)
         LocalDate targetDate = YearMonth.of(year, month).atEndOfMonth();
         Salary latestSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), targetDate)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji tidak ditemukan!"));
 
         int totalOvertimePay = attendanceRepository.getTotalOvertimePayByYearAndMonth(selectedUser.getId(), month, year).orElse(0);
 
@@ -105,7 +104,6 @@ public class SalaryServiceImpl implements SalaryService {
 
         int totalDeduction = attendanceRepository.getTotalDeductionByYearAndMonth(selectedUser.getId(), month, year).orElse(0);
         int baseSalary = validAttendancesCount * latestSalary.getAmount();
-        System.out.println("Count : " + validAttendancesCount);
 
         int totalSalary = baseSalary - (totalLoan + totalDeduction) + totalOvertimePay;
 
@@ -123,13 +121,12 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void addNewSalary(Long userId, String currentLoggedIn, int amount, int targetMonth, int targetYear) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
-        // CHANGE
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
         User currentUser = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         if (amount <= 0) {
-            throw new BadRequestException("Salary amount can't be 0 or less!");
+            throw new BadRequestException("Jumlah gaji tidak bisa 0 atau negatif!");
         }
 
         LocalDate targetDate = (LocalDate.now().getMonthValue() == targetMonth) ? LocalDate.now() : LocalDate.of(targetYear, targetMonth, 1);
@@ -142,12 +139,12 @@ public class SalaryServiceImpl implements SalaryService {
             salaryRepository.save(newSalary);
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = currentUser.getUsername() + " is add a new salary with amount of Rp. " + amount + " with effective date on " + Month.of(targetMonth).name().toLowerCase() + " " + targetYear;
+                String activityDescription = currentUser.getUsername() + " menambahkan data gaji baru dengan jumlah sebesar Rp. " + amount + " dan dengan tanggal berlaku pada " + Month.of(targetMonth).name().toLowerCase() + " " + targetYear;
                 activityLogService.addActivityLog(currentUser, "ADD", "Add new salary", "Salary", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new salary");
+            throw new InternalServerErrorException("Gagal menambahkan data gaji baru!");
         }
     }
 }

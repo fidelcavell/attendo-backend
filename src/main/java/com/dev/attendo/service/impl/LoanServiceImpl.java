@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class LoanServiceImpl implements LoanService {
@@ -52,10 +51,10 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanPagination getAllHistoryLoanByUserAndStoreAndMonthYear(Long userId, Long storeId, int month, int year, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
         Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
 
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -80,19 +79,18 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public void addLoan(Long userId, String currentLoggedIn, int newLoanAmount) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
-        // CHANGE
         User currentUser = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         Salary latestSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), null)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji tidak ditemukan!"));
 
         LocalDate currentDate = LocalDate.now();
         Loan existingLoan = loanRepository.getLoanByUserAndStoreAndDate(selectedUser.getId(), selectedUser.getStore().getId(), currentDate).orElse(null);
         if (existingLoan != null) {
-            throw new InternalServerErrorException("Loan action can be perform once a day!");
+            throw new InternalServerErrorException("Aksi penambahan data peminjaman hanya bisa dilakukan sehari sekali!");
         }
 
         int validAttendancesCount = attendanceRepository.countOnTimeAndLateByYearAndMonth(selectedUser.getId(), currentDate.getMonthValue(), currentDate.getYear()).orElse(0);
@@ -106,7 +104,7 @@ public class LoanServiceImpl implements LoanService {
         int totalSalary = baseSalary - (totalLoan + totalDeduction) + totalOvertimePay;
 
         if (newLoanAmount > totalSalary) {
-            throw new BadRequestException("Can't perform action, your current salary: Rp. " + totalSalary);
+            throw new BadRequestException("Aksi tidak bisa dilakukan, gaji yang telah dimiliki: Rp. " + totalSalary);
         }
 
         try {
@@ -117,12 +115,12 @@ public class LoanServiceImpl implements LoanService {
             loanRepository.save(newLoan);
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = currentUser.getUsername() + " is add a new loan for " + selectedUser.getUsername() + " with amount of Rp. " + newLoanAmount;
+                String activityDescription = currentUser.getUsername() + " menambahkan data peminjaman uang baru pada " + selectedUser.getUsername() + " dengan jumlah sebesar Rp. " + newLoanAmount;
                 activityLogService.addActivityLog(currentUser, "ADD", "Add new loan", "Loan", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new loan!");
+            throw new InternalServerErrorException("Gagal menambahkan data peminjaman uang baru!");
         }
     }
 
@@ -130,14 +128,13 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public void updateLoan(Long loanId, String currentLoggedIn, int newLoanAmount) {
         Loan selectedLoan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loan with id: " + loanId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data peminjaman uang dengan id: " + loanId + " tidak ditemukan!"));
 
-        // CHANGE
         User currentUser = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         Salary latestSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedLoan.getUser().getId(), null)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji tidak ditemukan!"));
 
         LocalDate currentDate = LocalDate.now();
 
@@ -151,7 +148,7 @@ public class LoanServiceImpl implements LoanService {
         int totalSalary = baseSalary - (totalLoan - selectedLoan.getAmount() + totalDeduction);
 
         if (newLoanAmount > totalSalary) {
-            throw new BadRequestException("Can't perform action, your current salary: Rp. " + totalSalary);
+            throw new BadRequestException("Aksi tidak bisa dilakukan, gaji yang telah dimiliki: Rp. " + totalSalary);
         }
 
         try {
@@ -160,12 +157,12 @@ public class LoanServiceImpl implements LoanService {
             loanRepository.save(selectedLoan);
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = currentUser.getUsername() + " changes " + selectedLoan.getUser().getUsername() + " loan's amount, created on " + currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + ", to Rp. " + newLoanAmount;
+                String activityDescription = currentUser.getUsername() + " mengubah data peminjaman uang milik " + selectedLoan.getUser().getUsername() +  " pada " + currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " dengan jumlah sebesar Rp. " + newLoanAmount;
                 activityLogService.addActivityLog(currentUser, "UPDATE", "Update Loan", "Loan", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update loan!");
+            throw new InternalServerErrorException("Gagal mengubah data peminjaman uang!");
         }
     }
 }

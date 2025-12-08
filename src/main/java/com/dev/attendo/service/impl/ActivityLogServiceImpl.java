@@ -69,7 +69,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
            activityLogRepository.save(newActivityLog);
 
        } catch (Exception e) {
-           throw new InternalServerErrorException("Failed to add new Audit Log!");
+           throw new InternalServerErrorException("Gagal menambahkan aktivitas log!");
        }
     }
 }

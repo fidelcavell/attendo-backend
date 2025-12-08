@@ -12,7 +12,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +31,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreDTO getStore(Long storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko tidak ditemukan!"));
         return modelMapper.map(store, StoreDTO.class);
     }
 
@@ -40,7 +39,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public void addStore(String ownerUsername, StoreDTO storeDTO) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(ownerUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + ownerUsername + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + ownerUsername + "tidak ditemukan!"));
 
         try {
             Store store = modelMapper.map(storeDTO, Store.class);
@@ -48,30 +47,30 @@ public class StoreServiceImpl implements StoreService {
             storeRepository.save(store);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to save Toko!");
+            throw new InternalServerErrorException("Gagal menambahkan data toko!");
         }
     }
 
     @Transactional
     @Override
     public void updateStore(Long storeId, StoreDTO storeDTO) {
-        Store store = storeRepository.findByIdAndIsActive(storeId, true)
-                .orElseThrow(() -> new ResourceNotFoundException("Store is not found!"));
+        Store selectedStore = storeRepository.findByIdAndIsActive(storeId, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko tidak ditemukan!"));
         System.out.println(storeDTO);
         try {
-            store.setName(storeDTO.getName());
-            store.setAddress(storeDTO.getAddress());
-            store.setLat(storeDTO.getLat());
-            store.setLng(storeDTO.getLng());
-            store.setRadius(storeDTO.getRadius());
-            store.setBreakDuration(storeDTO.getBreakDuration());
-            store.setUpdatedDate(LocalDateTime.now());
-            store.setMaxBreakCount(storeDTO.getMaxBreakCount());
-            store.setCurrentBreakCount(storeDTO.getCurrentBreakCount());
-            storeRepository.save(store);
+            selectedStore.setName(storeDTO.getName());
+            selectedStore.setAddress(storeDTO.getAddress());
+            selectedStore.setLat(storeDTO.getLat());
+            selectedStore.setLng(storeDTO.getLng());
+            selectedStore.setRadius(storeDTO.getRadius());
+            selectedStore.setBreakDuration(storeDTO.getBreakDuration());
+            selectedStore.setUpdatedDate(LocalDateTime.now());
+            selectedStore.setMaxBreakCount(storeDTO.getMaxBreakCount());
+            selectedStore.setCurrentBreakCount(storeDTO.getCurrentBreakCount());
+            storeRepository.save(selectedStore);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update Store!");
+            throw new InternalServerErrorException("Gagal mengubah data toko!");
         }
     }
 
@@ -79,7 +78,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public void storeActivation(Long storeId) {
         Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko tidak ditemukan!"));
         List<User> associatedUser = userRepository.findAllByStoreIdAndIsActive(selectedStore.getId(), true);
 
         try {
@@ -94,14 +93,14 @@ public class StoreServiceImpl implements StoreService {
             storeRepository.save(selectedStore);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to delete Store!");
+            throw new InternalServerErrorException("Gagal menghapus data toko!");
         }
     }
 
     @Override
     public List<StoreDTO> getAllOwnedStore(String username) {
         User owner = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
 
         List<Store> ownedStore = storeRepository.findAllByOwnerUsername(owner.getUsername());
         return ownedStore.stream().map(store -> modelMapper.map(store, StoreDTO.class)).toList();

@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -47,7 +45,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileDTO getProfile(Long profileId) {
         Profile selectedProfile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data Profile tidak ditemukan!"));
 
         ProfileDTO mappingResult = modelMapper.map(selectedProfile, ProfileDTO.class);
         mappingResult.setIdUser(selectedProfile.getUser().getId());
@@ -64,7 +62,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfilePagination getAllAssociateEmployee(String currentUser, Long storeId, String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User currentLoggedInUser = userRepository.findByUsernameAndIsActiveTrue(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentUser + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentUser + " tidak ditemukan!"));
 
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -99,16 +97,16 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public void addProfile(String username, ProfileDTO profileDTO, MultipartFile profilePicture) {
         User user = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
 
         if (user.getProfile() != null) {
-            throw new BadRequestException("User with username: " + username + " is already has profile data!");
+            throw new BadRequestException("User dengan username: " + username + " telah memiliki profile data!");
         }
 
         Profile newAddedProfile = modelMapper.map(profileDTO, Profile.class);
         Profile existProfile = profileRepository.findByName(newAddedProfile.getName());
         if (existProfile != null) {
-            throw new BadRequestException("Profile with name: " + newAddedProfile.getName() + " is already exist!");
+            throw new BadRequestException("Data profile dengan nama: " + newAddedProfile.getName() + " telah tersedia!");
         }
 
         try {
@@ -118,7 +116,7 @@ public class ProfileServiceImpl implements ProfileService {
             user.setProfile(newAddedProfile);
             userRepository.save(user);
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new user profile!");
+            throw new InternalServerErrorException("Gagal menambahkan data profile baru!");
         }
     }
 
@@ -126,7 +124,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public void updateProfile(Long profileId, ProfileDTO profileDTO, MultipartFile profilePicture) {
         Profile selectedProfile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data profile tidak ditemukan!"));
         try {
             selectedProfile.setName(profileDTO.getName());
             selectedProfile.setAddress(profileDTO.getAddress());
@@ -137,16 +135,16 @@ public class ProfileServiceImpl implements ProfileService {
             selectedProfile.setUpdatedDate(LocalDateTime.now());
             profileRepository.save(selectedProfile);
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update user profile! " + e.getMessage());
+            throw new InternalServerErrorException("Gagal mengubah data profile!");
         }
     }
 
     @Override
     public byte[] getProfilePicture(Long profileId) {
         Profile selectedProfile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data profile tidak ditemukan!"));
         if (selectedProfile.getProfilePicture() == null) {
-            throw new ResourceNotFoundException("Profile Picture is not available!");
+            throw new ResourceNotFoundException("Gambar profile tidak ditemukan!");
         }
         return selectedProfile.getProfilePicture();
     }
@@ -154,11 +152,11 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public void updateWorkSchedule(Long profileId, Long scheduleId, String currentUser) {
         Profile selectedProfile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile with id: " + profileId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data profile dengan id: " + profileId + " tidak ditemukan!"));
         Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Work Schedule with id: " + scheduleId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data jadwal kerja dengan id: " + scheduleId + " tidak ditemukan!"));
         User currentLoggedIn = userRepository.findByUsernameAndIsActiveTrue(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentUser + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentUser + " tidak ditemukan!"));
 
         try {
             selectedProfile.setSchedule(schedule);
@@ -167,12 +165,12 @@ public class ProfileServiceImpl implements ProfileService {
             if (currentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String scheduleTime = schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB" + " - " + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB";
 
-                String activityDescription = currentLoggedIn.getUsername() + " changes work schedule for: " + selectedProfile.getUser().getUsername() + " with schedule: " + scheduleTime;
+                String activityDescription = currentLoggedIn.getUsername() + " mengubah jadwal kerja pada " + selectedProfile.getUser().getUsername() + " dengan jadwal kerja baru: " + scheduleTime;
                 activityLogService.addActivityLog(currentLoggedIn, "UPDATE", "Update Work Schedule", "Profile", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update user's work schedule!");
+            throw new InternalServerErrorException("Gagal mengubah jadwal kerja yang diterapkan pada karyawan!");
         }
     }
 }

@@ -47,7 +47,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public List<ScheduleDTO> getAllSchedule(Long storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
 
         return scheduleRepository.findByStoreId(store.getId()).stream().map(workSchedule -> modelMapper.map(workSchedule, ScheduleDTO.class)).toList();
     }
@@ -56,12 +56,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void addSchedule(Long storeId, String currentLoggedIn, ScheduleDTO scheduleDTO) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
         User selectedCurrentLoggedIn = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         if (scheduleRepository.existsByNameAndStoreAndStartTimeAndEndTime(scheduleDTO.getName(), store, scheduleDTO.getStartTime(), scheduleDTO.getEndTime())) {
-            throw new BadRequestException("Work Schedule with name " + scheduleDTO.getName() + " and range time: " + scheduleDTO.getStartTime().toString() + " - " + scheduleDTO.getEndTime().toString() + " is already exist!");
+            throw new BadRequestException("Data jadwal kerja dengan nama " + scheduleDTO.getName() + " dan dengan waktu: " + scheduleDTO.getStartTime().toString() + " - " + scheduleDTO.getEndTime().toString() + " telah tersedia!");
         }
 
         try {
@@ -70,47 +70,46 @@ public class ScheduleServiceImpl implements ScheduleService {
             scheduleRepository.save(schedule);
 
             if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = selectedCurrentLoggedIn.getUsername() + " is added new schedule named: " + scheduleDTO.getName() + " with max late: " + scheduleDTO.getLateTolerance() + " minutes and time on: " + scheduleDTO.getStartTime() + " until " + scheduleDTO.getEndTime();
+                String activityDescription = selectedCurrentLoggedIn.getUsername() + " menambahkan jadwal kerja baru dengan nama: " + scheduleDTO.getName() + ", batas keterlambatan: " + scheduleDTO.getLateTolerance() + " minutes dan dengan waktu: " + scheduleDTO.getStartTime() + " hingga " + scheduleDTO.getEndTime();
                 activityLogService.addActivityLog(selectedCurrentLoggedIn, "ADD", "Add new schedule", "Schedule", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new schedule!");
+            throw new InternalServerErrorException("Gagal menambahkan data jadwal kerja baru!");
         }
     }
 
     @Override
     public void updateSchedule(Long scheduleId, String currentLoggedIn, ScheduleDTO scheduleDTO) {
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule with id: " + scheduleId + " is not found!"));
+        Schedule selectedSchedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Data jadwal kerja dengan id: " + scheduleId + " tidak ditemukan!"));
         User selectedCurrentLoggedIn = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedIn + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         try {
-            schedule.setName(scheduleDTO.getName());
-            schedule.setStartTime(scheduleDTO.getStartTime());
-            schedule.setEndTime(scheduleDTO.getEndTime());
-            schedule.setLateTolerance(scheduleDTO.getLateTolerance());
-            schedule.setUpdatedDate(LocalDateTime.now());
-            scheduleRepository.save(schedule);
+            selectedSchedule.setName(scheduleDTO.getName());
+            selectedSchedule.setStartTime(scheduleDTO.getStartTime());
+            selectedSchedule.setEndTime(scheduleDTO.getEndTime());
+            selectedSchedule.setLateTolerance(scheduleDTO.getLateTolerance());
+            selectedSchedule.setUpdatedDate(LocalDateTime.now());
+            scheduleRepository.save(selectedSchedule);
 
             if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = selectedCurrentLoggedIn.getUsername() + " is added new schedule called " + scheduleDTO.getName() + " with time on: " + scheduleDTO.getStartTime() + " until " + scheduleDTO.getEndTime();
+                String activityDescription = selectedCurrentLoggedIn.getUsername() + " mengubah data jadwal kerja " + scheduleDTO.getName() + " dengan waktu: " + scheduleDTO.getStartTime() + " hingga " + scheduleDTO.getEndTime();
                 activityLogService.addActivityLog(selectedCurrentLoggedIn, "UPDATE", "Add new schedule", "Schedule", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update work schedule!");
+            throw new InternalServerErrorException("Gagal mengubah data jadwal kerja!");
         }
     }
 
     @Override
     public void deleteSchedule(Long scheduleId) {
         Schedule selectedSchedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule with id: " + scheduleId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data jadwal kerja dengan id: " + scheduleId + " tidak ditemukan!"));
 
         List<Profile> profileList = profileRepository.findAllProfileByStoreAndScheduleAndIsActive(selectedSchedule.getStore().getId(), selectedSchedule.getId(), true);
-
         try {
             for (Profile profile : profileList) {
                 profile.setSchedule(null);
@@ -118,9 +117,8 @@ public class ScheduleServiceImpl implements ScheduleService {
             profileRepository.saveAll(profileList);
             scheduleRepository.delete(selectedSchedule);
 
-
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to delete work schedule!");
+            throw new InternalServerErrorException("Gagal menghapus data jadwal kerja!");
         }
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -117,6 +116,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDate currentDate = LocalDate.now();
         LocalDate startDate = currentDate.minusMonths(period - 1).withDayOfMonth(1);
 
+        // Fetch data from database
         List<Object[]> result = attendanceRepository.getLateEmployeesCountSummary(selectedStore.getId(), startDate, currentDate);
 
         List<Map<String, Object>> employeeStats = new ArrayList<>();
@@ -124,6 +124,7 @@ public class ReportServiceImpl implements ReportService {
         int totalLateCount = 0;
         int totalLateMinutes = 0;
 
+        // Map and merge value -> Late distribution per month in a period
         for (Object[] row : result) {
             Long userId = ((Number) row[0]).longValue();
             int year = ((Number) row[1]).intValue();
@@ -147,6 +148,7 @@ public class ReportServiceImpl implements ReportService {
             monthlyLateMapping.merge(monthLabel, lateCount, Long::sum);
         }
 
+        // Get Top 5 most late employees
         List<Map<String, Object>> top5 = employeeStats.stream()
                 .sorted((a, b) -> Long.compare(
                         (Long) b.get("lateCount"),
@@ -155,6 +157,7 @@ public class ReportServiceImpl implements ReportService {
                 .limit(5)
                 .toList();
 
+        // Ensure all month is exists (if not, the data get filled by 0)
         LocalDate tempDate = startDate;
         while (!tempDate.isAfter(currentDate)) {
             String label = YearMonth.of(tempDate.getYear(), tempDate.getMonthValue()).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH));
@@ -162,6 +165,7 @@ public class ReportServiceImpl implements ReportService {
             tempDate = tempDate.plusMonths(1);
         }
 
+        // Sorted Late Distribution per month in period (ordered by month)
         List<Map<String, Object>> monthlyLateDistribution = monthlyLateMapping.entrySet().stream()
                 .sorted(Comparator.comparing(entry ->
                         YearMonth.parse(entry.getKey(), DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
@@ -174,7 +178,7 @@ public class ReportServiceImpl implements ReportService {
                 })
                 .toList();
 
-        // prepare summary
+        // Create response summary
         Map<String, Object> summary = new LinkedHashMap<>();
         summary.put("totalEmployeesLate", employeeStats.size());
         summary.put("totalLateCount", totalLateCount);
@@ -195,6 +199,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDate currentDate = LocalDate.now();
         LocalDate startDate = currentDate.minusMonths(period - 1).withDayOfMonth(1);
 
+        // Get data from database
         List<Object[]> resultLeaveApplication = leaveApplicationRepository.getLeaveOvertimeSummary(
                 selectedStore.getId(), startDate, currentDate);
 
@@ -203,7 +208,7 @@ public class ReportServiceImpl implements ReportService {
         Map<String, Map<String, Integer>> leaveTotals = new HashMap<>();
         Map<String, Map<String, Map<String, Integer>>> leaveTotalsByMonth = new LinkedHashMap<>();
 
-        // 🔹 Hitung total cuti & per bulan
+        // Map and merge value
         for (Object[] row : resultLeaveApplication) {
             int year = ((Number) row[0]).intValue();
             int month = ((Number) row[1]).intValue();
@@ -215,14 +220,13 @@ public class ReportServiceImpl implements ReportService {
             totalLeaveDaysInPeriod += totalLeaveDays;
             totalLeaveRequestInPeriod += totalLeaveRequest;
 
-            // Total per jenis
+            // --
             leaveTotals.computeIfAbsent(leaveType, key -> new HashMap<>());
             leaveTotals.get(leaveType).merge("totalRequests", totalLeaveRequest, Integer::sum);
             leaveTotals.get(leaveType).merge("leaveDays", totalLeaveDays, Integer::sum);
 
-            // Total per bulan
+            // --
             String yearMonth = YearMonth.of(year, month).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH));
-
             leaveTotalsByMonth.computeIfAbsent(yearMonth, k -> new HashMap<>());
             leaveTotalsByMonth.get(yearMonth).computeIfAbsent(leaveType, k -> new HashMap<>());
 
@@ -231,7 +235,7 @@ public class ReportServiceImpl implements ReportService {
             leaveData.merge("leaveDays", totalLeaveDays, Integer::sum);
         }
 
-        // 🔹 Pastikan semua bulan & tipe cuti ada (meski 0)
+        // Ensure all month is exists (if not, the data get filled by 0)
         LocalDate tempDate = startDate;
         while (!tempDate.isAfter(currentDate)) {
             String key = YearMonth.of(tempDate.getYear(), tempDate.getMonthValue())
@@ -248,9 +252,10 @@ public class ReportServiceImpl implements ReportService {
             tempDate = tempDate.plusMonths(1);
         }
 
+        // Sorted Leave Distribution - in Bar Chart (ordered by month)
         List<Map<String, Object>> leaveDistributionByMonth = leaveTotalsByMonth.entrySet().stream()
                 .sorted(Comparator.comparing(entry -> {
-                    String key = entry.getKey(); // contoh: "March 2025"
+                    String key = entry.getKey();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
                     return YearMonth.parse(key, formatter);
                 }))
@@ -270,14 +275,14 @@ public class ReportServiceImpl implements ReportService {
                 })
                 .toList();
 
-        // 🔹 Buat ringkasan
+        // Create leave response's summary
         Map<String, Object> summary = new LinkedHashMap<>();
         summary.put("totalLeaveDaysInPeriod", totalLeaveDaysInPeriod);
         summary.put("totalLeaveRequestInPeriod", totalLeaveRequestInPeriod);
         summary.put("leaveDistributionByMonth", leaveDistributionByMonth);
 
+        // Leave Distribution - in Pie Chart
         List<Map<String, Object>> pieDistribution = new ArrayList<>();
-
         for (LeaveTypeEnum type : LeaveTypeEnum.values()) {
             String key = type.name();
             Map<String, Integer> stats = leaveTotals.getOrDefault(key, Map.of("totalRequests", 0, "leaveDays", 0));
@@ -305,13 +310,15 @@ public class ReportServiceImpl implements ReportService {
         }
         summary.put("pieDistribution", pieDistribution);
 
-        // 🔹 Bagian lembur (overtime)
+
+        // Fetch overtime's data from database
         List<Object[]> resultOvertimeApplication = overtimeApplicationRepository.getOvertimeCountSummary(
                 selectedStore.getId(), startDate, currentDate);
 
         Map<String, Integer> overtimeTotalsByMonth = new LinkedHashMap<>();
         int totalOvertimeDaysInPeriod = 0;
 
+        // Merge value
         for (Object[] row : resultOvertimeApplication) {
             int year = ((Number) row[0]).intValue();
             int month = ((Number) row[1]).intValue();
@@ -323,7 +330,7 @@ public class ReportServiceImpl implements ReportService {
             overtimeTotalsByMonth.merge(key, totalOvertimeDays, Integer::sum);
         }
 
-        // Pastikan setiap bulan ada
+        // Ensure all month is exists (if not, the data get filled by 0)
         tempDate = startDate;
         while (!tempDate.isAfter(currentDate)) {
             String key = YearMonth.of(tempDate.getYear(), tempDate.getMonthValue())
@@ -332,16 +339,23 @@ public class ReportServiceImpl implements ReportService {
             tempDate = tempDate.plusMonths(1);
         }
 
+        // Sorted overtime distribution - in Bar Chart (ordered by month)
         List<Map<String, Object>> overtimeDaysDistributionByMonth = overtimeTotalsByMonth.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .map(e -> {
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("month", e.getKey());
-                    m.put("count", e.getValue());
-                    return m;
-                })
-                .toList();
+                .sorted(Comparator.comparing(entry -> {
+                    String key = entry.getKey();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
+                    return YearMonth.parse(key, formatter);
+                })).map(entry -> {
+                    String month = entry.getKey();
+                    int count = entry.getValue();
 
+                    Map<String, Object> objectData = new LinkedHashMap<>();
+                    objectData.put("month", month);
+                    objectData.put("count", count);
+                    return objectData;
+                }).toList();
+
+        // Create overtime response's summary
         summary.put("totalOvertimeDaysInPeriod", totalOvertimeDaysInPeriod);
         summary.put("overtimeDaysDistributionByMonth", overtimeDaysDistributionByMonth);
 

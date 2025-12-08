@@ -53,7 +53,7 @@ public class ProfileController {
     ) throws IOException {
         profileService.addProfile(username, profileDTO, profilePicture);
         return ResponseEntity.ok(
-                new MessageResponse(true, username + "'s profile has been created!")
+                new MessageResponse(true, "Data profile berhasil ditambahkan!")
         );
     }
 
@@ -67,7 +67,7 @@ public class ProfileController {
             @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture
     ) {
         profileService.updateProfile(profileId, profileDTO, profilePicture);
-        return ResponseEntity.ok(new MessageResponse(true, "User's profile has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data profile berhasil diubah!"));
     }
 
     @GetMapping("/{profileId}/profile-picture")
@@ -86,6 +86,6 @@ public class ProfileController {
             @RequestParam String currentUser
     ) {
         profileService.updateWorkSchedule(profileId, scheduleId, currentUser);
-        return ResponseEntity.ok(new MessageResponse(true, "New Schedule is has been assigned!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data jadwal kerja baru berhasil diterapkan!"));
     }
 }

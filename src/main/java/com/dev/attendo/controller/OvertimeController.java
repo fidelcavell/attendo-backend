@@ -65,7 +65,7 @@ public class OvertimeController {
             @RequestBody OvertimeDTO overtimeDTO
     ) {
         overtimeService.addNewOvertimeApplication(userId, scheduleId, overtimeDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "New Overtime Application has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan lembur baru berhasil ditambahkan!"));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
@@ -76,12 +76,12 @@ public class OvertimeController {
             @RequestParam(name = "status") String approvalStatus
     ) {
         overtimeService.updateOvertimeApplication(overtimeId, approverName, approvalStatus);
-        return ResponseEntity.ok(new MessageResponse(true, "Overtime Application has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan lembur berhasil diubah!"));
     }
 
     @DeleteMapping("/{overtimeId}")
     public ResponseEntity<?> deleteOvertimeApplication(@PathVariable Long overtimeId) {
         overtimeService.deleteOvertimeApplication(overtimeId);
-        return ResponseEntity.ok(new MessageResponse(true, "Overtime Application has been deleted!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data pengajuan lembur berhasil dihapus!"));
     }
 }

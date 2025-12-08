@@ -29,44 +29,44 @@ public class AuthController {
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
         userService.signUp(request);
-        return ResponseEntity.ok(new MessageResponse(true, "Email verification has been sent!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Email verifikasi berhasil dikirim!"));
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         userService.generatePasswordResetToken(email);
-        return ResponseEntity.ok(new MessageResponse(true, "Password Reset Token has been sent!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Password Reset Token berhasil dikirim!"));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         userService.resetPassword(token, newPassword);
-        return ResponseEntity.ok(new MessageResponse(true, "Password has been changed!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Password berhasil diubah!"));
     }
 
     @PutMapping("/account-email-activation")
     public ResponseEntity<?> accountEmailActivation(@RequestParam String token) {
         userService.emailVerification(token, "EMAIL_VERIFICATION");
-        return ResponseEntity.ok(new MessageResponse(true, "Email has been verified!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Email berhasil diverifikasi!"));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/change-password/{username}")
     public ResponseEntity<?> changePassword(@PathVariable String username, @Valid @RequestBody ChangePasswordRequest request) {
         userService.changePassword(username, request);
-        return ResponseEntity.ok(new MessageResponse(true, "Password has been changed!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Password berhasil diubah!"));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/change-email/{username}")
     public ResponseEntity<?> changeEmail(@PathVariable String username, @Valid @RequestBody ChangeEmailRequest request) {
         userService.changeEmail(username, request);
-        return ResponseEntity.ok(new MessageResponse(true, "Change email verification has been sent!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Verifikasi ubah email berhasil dikirim!"));
     }
 
     @PutMapping("/account-email-change")
     public ResponseEntity<?> accountEmailChange(@RequestParam String token) {
         userService.emailVerification(token, "EMAIL_CHANGE");
-        return ResponseEntity.ok(new MessageResponse(true, "Account's email has been changed!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Email berhasil diubah!"));
     }
 }

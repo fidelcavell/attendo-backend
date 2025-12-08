@@ -53,18 +53,18 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public OvertimeDTO getOvertimeApplicationById(Long overtimeId) {
         OvertimeApplication selectedOvertimeApplication = overtimeRepository.findById(overtimeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Overtime application with id: " + overtimeId + " is not found!"));
-        OvertimeDTO overtimeTicketDTO = modelMapper.map(selectedOvertimeApplication, OvertimeDTO.class);
-        overtimeTicketDTO.setAssignedTime(selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB - " + selectedOvertimeApplication.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB");
-        overtimeTicketDTO.setIssuedBy(selectedOvertimeApplication.getUser().getUsername());
-        overtimeTicketDTO.setApprovedBy(selectedOvertimeApplication.getApprover() == null ? "-" : selectedOvertimeApplication.getApprover().getUsername());
-        return overtimeTicketDTO;
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan lembur dengan id: " + overtimeId + " tidak ditemukan!"));
+        OvertimeDTO overtimeApplicationDTO = modelMapper.map(selectedOvertimeApplication, OvertimeDTO.class);
+        overtimeApplicationDTO.setAssignedTime(selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB - " + selectedOvertimeApplication.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB");
+        overtimeApplicationDTO.setIssuedBy(selectedOvertimeApplication.getUser().getUsername());
+        overtimeApplicationDTO.setApprovedBy(selectedOvertimeApplication.getApprover() == null ? "-" : selectedOvertimeApplication.getApprover().getUsername());
+        return overtimeApplicationDTO;
     }
 
     @Override
     public OvertimePagination getAllOvertimeApplication(Long storeId, String currentUser, String keyword, String status, LocalDate selectedStartDate, LocalDate selectedEndDate, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentUser + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentUser + " tidak ditemukan!"));
 
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -94,7 +94,7 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public OvertimePagination getAllRequestedOvertimeApplication(Long userId, Long storeId, String status, LocalDate selectedStartDate, LocalDate selectedEndDate, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -126,9 +126,9 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public void addNewOvertimeApplication(Long userId, Long scheduleId, OvertimeDTO overtimeDTO) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
         Schedule selectedSchedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule with id: " + scheduleId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data jadwal kerja dengan id: " + scheduleId + " tidak ditemukan!"));
 
         Salary selectedUserSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(selectedUser.getId(), null).orElse(null);
         int latestSalaryAmount = selectedUserSalary != null ? selectedUserSalary.getAmount() : 0;
@@ -146,7 +146,7 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
             overtimeRepository.save(overtimeApplication);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new overtime application!");
+            throw new InternalServerErrorException("Gagal menambahkan pengajuan lembur yang baru!");
         }
     }
 
@@ -154,13 +154,13 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public void updateOvertimeApplication(Long overtimeId, String approverName, String approvalStatus) {
         OvertimeApplication selectedOvertimeApplication = overtimeRepository.findById(overtimeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Overtime application with id: " + overtimeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan lembur dengan id: " + overtimeId + " tidak ditemukan!"));
         User approver = userRepository.findByUsernameAndIsActiveTrue(approverName)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + approverName + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + approverName + " tidak ditemukan!"));
         User applicant = selectedOvertimeApplication.getUser();
 
         Salary currentSalary = salaryRepository.findLatestActiveSalaryByUserAndOptionalDate(applicant.getId(), null)
-                .orElseThrow(() -> new ResourceNotFoundException("Salary is not defined yet!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data gaji belum didefinisikan!"));
 
         try {
             if (ApprovalStatusEnum.valueOf(approvalStatus) == ApprovalStatusEnum.APPROVED) {
@@ -187,12 +187,12 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
             if (approver.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String scheduleTime = selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB" + " - " + selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB";
 
-                String activityDescription = approver.getUsername() + " is " + approvalStatus + " a overtime application with date: " + selectedOvertimeApplication.getOvertimeDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " with schedule: " + scheduleTime + ", issued by: " + applicant.getUsername();
+                String activityDescription = approver.getUsername() + " melakukan " + approvalStatus + " pada pengajuan lembur dengan tanggal " + selectedOvertimeApplication.getOvertimeDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " dengan jadwal kerja: " + scheduleTime + " yang dilakukan oleh " + applicant.getUsername();
                 activityLogService.addActivityLog(approver, "UPDATE", "Update Overtime Application", "OvertimeApplication", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update overtime application!");
+            throw new InternalServerErrorException("Gagal mengubah pengajuan lembur!");
         }
     }
 
@@ -200,17 +200,17 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
     @Override
     public void deleteOvertimeApplication(Long overtimeId) {
         OvertimeApplication selectedOvertimeApplication = overtimeRepository.findById(overtimeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Overtime Application with id: " + overtimeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan lembur dengan id: " + overtimeId + " tidak ditemukan!"));
 
         if (selectedOvertimeApplication.getStatus() != ApprovalStatusEnum.PENDING) {
-            throw new BadRequestException("Delete action can't be perform on application with APPROVED or REJECTED status!");
+            throw new BadRequestException("Tidak bisa menghapus pengajuan dengan status APPROVED atau REJECTED!");
         }
 
         try {
             overtimeRepository.delete(selectedOvertimeApplication);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to delete overtime application!");
+            throw new InternalServerErrorException("Gagal menghapus pengajuan lembur!");
         }
     }
 }

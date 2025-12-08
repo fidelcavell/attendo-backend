@@ -35,12 +35,12 @@ public class LoanController {
     @PostMapping("/{userId}")
     public ResponseEntity<?> addLoan(@PathVariable Long userId, @RequestParam String currentLoggedIn, @RequestParam int newLoanAmount) {
         loanService.addLoan(userId, currentLoggedIn, newLoanAmount);
-        return ResponseEntity.ok(new MessageResponse(true, "New loan has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data peminjaman uang baru berhasil ditambahkan!"));
     }
 
     @PutMapping("/{loanId}")
     public ResponseEntity<?> updateLoan(@PathVariable Long loanId, @RequestParam String currentLoggedIn, @RequestParam int newLoanAmount) {
         loanService.updateLoan(loanId, currentLoggedIn, newLoanAmount);
-        return ResponseEntity.ok(new MessageResponse(true, "Loan has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data peminjaman uang berhasil diubah!"));
     }
 }

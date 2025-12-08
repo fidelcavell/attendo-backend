@@ -100,11 +100,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void signUp(SignUpRequest request) {
         if (userRepository.existsByUsernameAndIsActiveTrue(request.getUsername())) {
-            throw new BadRequestException("Username is already taken!");
+            throw new BadRequestException("Username telah digunakan!");
         }
 
         if (userRepository.existsByEmailAndIsActiveTrue(request.getEmail())) {
-            throw new BadRequestException("Email is already taken!");
+            throw new BadRequestException("Email telah digunakan!");
         }
 
         User selectedUser = userRepository.findByUsername(request.getUsername()).orElse(null);
@@ -113,15 +113,15 @@ public class UserServiceImpl implements UserService {
 
         if (requestRole == null || requestRole.isEmpty()) {
             role = roleRepository.findByName(RoleEnum.ROLE_EMPLOYEE)
-                    .orElseThrow(() -> new ResourceNotFoundException("Role is not found!"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
         } else {
             String existRoles = requestRole.iterator().next();
             if (existRoles.equals("owner")) {
                 role = roleRepository.findByName(RoleEnum.ROLE_OWNER)
-                        .orElseThrow(() -> new ResourceNotFoundException("Role is not found!"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
             } else {
                 role = roleRepository.findByName(RoleEnum.ROLE_EMPLOYEE)
-                        .orElseThrow(() -> new ResourceNotFoundException("Role is not found!"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
             }
         }
 
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
             emailService.sendPasswordResetEmail(selectedUser.getEmail(), emailVerificationUrl, "Email Verification", emailVerificationToken.getUser().getUsername(), content, "Verify Email", "30 minutes");
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to Sign Up!");
+            throw new InternalServerErrorException("Gagal melakukan sign up!");
         }
     }
 
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void generatePasswordResetToken(String email) {
         User selectedUser = userRepository.findByEmailAndIsActiveTrue(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User with email: " + email + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan email: " + email + " tidak ditemukan!"));
 
         try {
             String token = UUID.randomUUID().toString();
@@ -176,33 +176,33 @@ public class UserServiceImpl implements UserService {
             emailService.sendPasswordResetEmail(selectedUser.getEmail(), resetPasswordUrl, "Password Reset Request", resetToken.getUser().getUsername(), content, "Reset Password", "30 minutes");
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to sent the email! " + e);
+            throw new InternalServerErrorException("Gagal mengirimkan email!");
         }
     }
 
     @Transactional
     @Override
     public void resetPassword(String token, String newPassword) {
-        Token resetToken = tokenRepository.findByTokenAndType(token, TokenTypeEnum.RESET_PASSWORD)
-                .orElseThrow(() -> new ResourceNotFoundException("Token is not found!"));
+        Token selectedResetToken = tokenRepository.findByTokenAndType(token, TokenTypeEnum.RESET_PASSWORD)
+                .orElseThrow(() -> new ResourceNotFoundException("Token tidak ditemukan!"));
 
-        if (resetToken.isUsed()) {
-            throw new BadRequestException("Token has already been used!");
+        if (selectedResetToken.isUsed()) {
+            throw new BadRequestException("Token telah digunakan!");
         }
-        if (resetToken.getExpireDate().isBefore(Instant.now())) {
-            throw new BadRequestException("Token has expired!");
+        if (selectedResetToken.getExpireDate().isBefore(Instant.now())) {
+            throw new BadRequestException("Token telah kadaluarsa!");
         }
 
         try {
-            User selectedUser = resetToken.getUser();
+            User selectedUser = selectedResetToken.getUser();
             selectedUser.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(selectedUser);
 
-            resetToken.setUsed(true);
-            tokenRepository.save(resetToken);
+            selectedResetToken.setUsed(true);
+            tokenRepository.save(selectedResetToken);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to reset the password!");
+            throw new InternalServerErrorException("Gagal melakukan reset password!");
         }
     }
 
@@ -210,32 +210,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addEmployeeToStore(Long storeId, String username, String currentLoggedInUser, int salaryAmount) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
         Store selectedStore = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store with id: " + storeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data toko dengan id: " + storeId + " tidak ditemukan!"));
         User loggedInUser = userRepository.findByUsernameAndIsActiveTrue(currentLoggedInUser)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentLoggedInUser + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedInUser + " tidak ditemukan!"));
 
         if (selectedUser.getRole().getName() == RoleEnum.ROLE_OWNER) {
-            throw new BadRequestException("User with username: " + username + "can't be added (OWNER)!");
+            throw new BadRequestException("User dengan username: " + username + " tidak bisa ditambahkan (OWNER)!");
         }
 
         if (selectedUser.getStore() != null) {
             if (!selectedUser.getStore().getId().equals(storeId)) {
-                throw new BadRequestException("User with username: " + username + " is already associated with another store!");
+                throw new BadRequestException("User dengan username: " + username + " telah terasosiasi dengan toko lain!");
             }
-            throw new BadRequestException("User with username: " + username + " is already part of this store!");
+            throw new BadRequestException("User dengan username: " + username + " telah terasosiasi dengan toko ini!");
         }
 
         if (!selectedStore.isActive()) {
-            throw new BadRequestException("Your store is deactivate, cannot add new employee!");
+            throw new BadRequestException("Status toko saat ini adalah deactivate, tidak bisa menambahkan karyawan baru!");
         }
 
         try {
-            if (loggedInUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                activityLogService.addActivityLog(loggedInUser, "ADD", "Add new employee to Store", "User", "Add new employee: " + username + " to store: " + selectedStore.getName() + " with salary amount: Rp." + salaryAmount);
-            }
-
             selectedUser.setStore(selectedStore);
             userRepository.save(selectedUser);
 
@@ -246,8 +242,13 @@ public class UserServiceImpl implements UserService {
             newSalary.setStore(selectedStore);
             salaryRepository.save(newSalary);
 
+            if (loggedInUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
+                String activityDescription = "Menambahkan data karyawan baru dengan username: " + username + " ke dalam toko: " + selectedStore.getName() + " dengan jumlah gaji sebesar Rp." + salaryAmount;
+                activityLogService.addActivityLog(loggedInUser, "ADD", "Add new employee to Store", "User", activityDescription);
+            }
+
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to remove the employee!");
+            throw new InternalServerErrorException("Gagal menambahkan data karyawan baru ke toko!");
         }
     }
 
@@ -255,27 +256,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public void removeEmployeeFromStore(String username) {
         User user = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
+        Role role = roleRepository.findByName(RoleEnum.ROLE_EMPLOYEE)
+                .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
 
         try {
             user.getProfile().setSchedule(null);
             user.setStore(null);
+            user.setRole(role);
             user.setUpdatedDate(LocalDateTime.now());
             userRepository.save(user);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to remove the employee!");
+            throw new InternalServerErrorException("Gagal menghapus data karyawan!");
         }
     }
 
     @Override
     public void updateEmployeeRole(String username) {
         User user = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
         Role employeeRole = roleRepository.findByName(RoleEnum.ROLE_EMPLOYEE)
-                .orElseThrow(() -> new ResourceNotFoundException("Role is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
         Role adminRole = roleRepository.findByName(RoleEnum.ROLE_ADMIN)
-                .orElseThrow(() -> new ResourceNotFoundException("Role is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan!"));
 
         try {
             if (user.getRole().getName().equals(RoleEnum.ROLE_EMPLOYEE)) {
@@ -286,14 +290,14 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update employee's role!");
+            throw new InternalServerErrorException("Gagal mengubah hak akses karyawan!");
         }
     }
 
     @Override
     public UserDTO getUserByUsername(String username) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
         UserDTO userDTO = modelMapper.map(selectedUser, UserDTO.class);
         userDTO.setIdProfile(selectedUser.getProfile() == null ? null : selectedUser.getProfile().getId());
         userDTO.setIdSchedule(selectedUser.getProfile() == null ? null : selectedUser.getProfile().getSchedule() == null ? null : selectedUser.getProfile().getSchedule().getId());
@@ -305,10 +309,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(String username, ChangePasswordRequest request) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), selectedUser.getPassword())) {
-            throw new BadRequestException("Your current password is incorrect!");
+            throw new BadRequestException("Password saat ini tidak sesuai!");
         }
         selectedUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(selectedUser);
@@ -317,9 +321,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void deleteAccount(String username) {
-        // CHANGE
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
 
         try {
             String base = LocalDateTime.now().toString() + UUID.randomUUID();
@@ -332,25 +335,24 @@ public class UserServiceImpl implements UserService {
             userRepository.save(selectedUser);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to delete account!");
+            throw new InternalServerErrorException("Gagal menghapus akun karyawan!");
         }
     }
 
     @Override
     public void emailVerification(String token, String type) {
         TokenTypeEnum tokenType = TokenTypeEnum.valueOf(type);
-
         Token emailVerifyToken = tokenRepository.findByTokenAndType(token, tokenType)
-                .orElseThrow(() -> new ResourceNotFoundException("Token is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Token tidak ditemukan!"));
 
         if (emailVerifyToken.isUsed()) {
-            throw new BadRequestException("Token has already been used!");
+            throw new BadRequestException("Token telah digunakan!");
         }
         if (emailVerifyToken.getExpireDate().isBefore(Instant.now())) {
-            throw new BadRequestException("Token has expired!");
+            throw new BadRequestException("Token telah kadaluarsa!");
         }
         if (emailVerifyToken.getUser().isActive() && tokenType == TokenTypeEnum.EMAIL_VERIFICATION) {
-            throw new InternalServerErrorException("Account is already activated!");
+            throw new InternalServerErrorException("Akun telah teraktivasi!");
         }
 
         try {
@@ -367,24 +369,22 @@ public class UserServiceImpl implements UserService {
             tokenRepository.save(emailVerifyToken);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to verify email");
+            throw new InternalServerErrorException("Gagal memverifikasi email");
         }
     }
 
     @Override
     public void changeEmail(String username, ChangeEmailRequest request) {
-        // CHANGE
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + username + " is not found!"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + username + " tidak ditemukan!"));
         User existingUser = userRepository.findByEmailAndIsActiveTrue(request.getNewEmail()).orElse(null);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), selectedUser.getPassword())) {
-            throw new BadRequestException("Your current password is incorrect!");
+            throw new BadRequestException("Password saat ini tidak sesuai!");
         }
 
         if (Objects.equals(selectedUser.getEmail(), request.getNewEmail()) || existingUser != null) {
-            throw new BadRequestException("Email is already taken!");
+            throw new BadRequestException("Email telah digunakan!");
         }
 
         try {
@@ -401,7 +401,7 @@ public class UserServiceImpl implements UserService {
             emailService.sendPasswordResetEmail(request.getNewEmail(), changeEmailUrl, "Change Email Request", changeEmailToken.getUser().getUsername(), content, "Change Email", "30 minutes");
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to sent the email! " + e);
+            throw new InternalServerErrorException("Gagal mengirimkan email!");
         }
     }
 }

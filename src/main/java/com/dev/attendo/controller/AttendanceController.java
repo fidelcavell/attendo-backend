@@ -88,7 +88,7 @@ public class AttendanceController {
             @RequestParam double lng
     ) {
         attendanceService.dailyClockIn(username, currentDateTime, photo, lat, lng);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully clocked-in!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Clock-In Harian berhasil dilakukan!"));
     }
 
     @PutMapping("/clock-out/{attendanceId}")
@@ -100,7 +100,7 @@ public class AttendanceController {
             @RequestParam double lng
     ) {
         attendanceService.dailyClockOut(attendanceId, currentDateTime, photo, lat, lng);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully clocked-out!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Clock-Out Harian berhasil dilakukan!"));
     }
 
     @PutMapping("/break-in/{attendanceId}")
@@ -109,7 +109,7 @@ public class AttendanceController {
             @RequestParam LocalDateTime currentDateTime
     ) {
         attendanceService.breakIn(attendanceId, currentDateTime);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully break-in!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Break-In Harian berhasil dilakukan!"));
     }
 
     @PutMapping("/break-out/{attendanceId}")
@@ -118,7 +118,7 @@ public class AttendanceController {
             @RequestParam LocalDateTime currentDateTime
     ) {
         attendanceService.breakOut(attendanceId, currentDateTime);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully break-out!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Break-Out Harian berhasil dilakukan!"));
     }
 
     @PutMapping("/overtime-clock-in/{attendanceId}")
@@ -130,7 +130,7 @@ public class AttendanceController {
             @RequestParam double lng
     ) {
         attendanceService.overtimeClockIn(attendanceId, currentDateTime, photo, lat, lng);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully overtime clocked-in!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Clock-In Lembur berhasil dilakukan!"));
     }
 
     @PutMapping("/overtime-clock-out/{attendanceId}")
@@ -142,7 +142,7 @@ public class AttendanceController {
             @RequestParam double lng
     ) {
         attendanceService.overtimeClockOut(attendanceId, currentDateTime, photo, lat, lng);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully overtime clocked-out!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Clock-Out Lembur berhasil dilakukan!"));
     }
 
     @PutMapping("/overtime-break-in/{attendanceId}")
@@ -151,7 +151,7 @@ public class AttendanceController {
             @RequestParam LocalDateTime currentDateTime
     ) {
         attendanceService.breakIn(attendanceId, currentDateTime);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully overtime break-in!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Break-In Lembur berhasil dilakukan!"));
     }
 
     @PutMapping("/overtime-break-out/{attendanceId}")
@@ -160,14 +160,14 @@ public class AttendanceController {
             @RequestParam LocalDateTime currentDateTime
     ) {
         attendanceService.breakOut(attendanceId, currentDateTime);
-        return ResponseEntity.ok(new MessageResponse(true, "You've successfully overtime break-out!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Break-Out Lembur berhasil dilakukan!"));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     @DeleteMapping("/{attendanceId}")
     public ResponseEntity<?> removeAttendance(@PathVariable Long attendanceId, @RequestParam String currentLoggedIn) {
         attendanceService.removeAttendance(attendanceId, currentLoggedIn);
-        return ResponseEntity.ok(new MessageResponse(true, "Attendance has been removed!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data presensi berhasil dihapus!"));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
@@ -180,6 +180,6 @@ public class AttendanceController {
             @RequestParam String attendanceDescription
     ) {
         attendanceService.updateAttendance(attendanceId, currentLoggedIn, attendanceStatus, deductionAmount, attendanceDescription);
-        return ResponseEntity.ok(new MessageResponse(true, "Attendance has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data presensi berhasil diubah!"));
     }
 }

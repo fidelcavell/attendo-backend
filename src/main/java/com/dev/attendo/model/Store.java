@@ -23,11 +23,10 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 6)
+    @Size(min = 3, message = "Nama toko harus memiliki minimal 3 karakter")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Alamat toko tidak boleh kosong")
     private String address;
 
     @Column(name = "latitude")

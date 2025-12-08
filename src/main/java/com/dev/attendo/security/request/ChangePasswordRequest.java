@@ -9,6 +9,6 @@ import lombok.Setter;
 public class ChangePasswordRequest {
     private String currentPassword;
 
-    @Size(min = 8, max = 30, message = "Password must be at least 8 character!")
+    @Size(min = 8, max = 30, message = "Password harus memiliki minimal 8 karakter!")
     private String newPassword;
 }

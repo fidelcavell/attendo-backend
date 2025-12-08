@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class ChangeEmailRequest {
     @Email
-    @NotBlank
+    @NotBlank(message = "Email tidak boleh kosong!")
     private String newEmail;
 
     private String currentPassword;

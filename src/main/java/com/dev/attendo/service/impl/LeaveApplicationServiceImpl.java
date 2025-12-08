@@ -50,7 +50,7 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Override
     public LeavePagination getAllLeaveApplication(String currentUser, String keyword, String status, String type, Long storeId, LocalDate selectedStartDate, LocalDate selectedEndDate, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User selectedUser = userRepository.findByUsernameAndIsActiveTrue(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username: " + currentUser + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentUser + " tidak ditemukan!"));
 
         LeaveTypeEnum typeEnum = Objects.equals(type, "All") ? null : LeaveTypeEnum.valueOf(type);
 
@@ -81,7 +81,7 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Override
     public LeavePagination getAllRequestedLeaveApplication(Long userId, String status, String type, Long storeId, LocalDate selectedStartDate, LocalDate selectedEndDate, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         User selectedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id: " + userId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User dengan id: " + userId + " tidak ditemukan!"));
 
         LeaveTypeEnum typeEnum = Objects.equals(type, "All") ? null : LeaveTypeEnum.valueOf(type);
 
@@ -112,33 +112,33 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Override
     public LeaveDTO getLeaveApplication(Long leaveTicketId) {
         LeaveApplication selectedLeaveApplication = leaveApplicationRepository.findById(leaveTicketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave Ticket with id: " + leaveTicketId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan perizinan dengan id: " + leaveTicketId + " tidak ditemukan!"));
 
-        LeaveDTO leaveTicketDTO = modelMapper.map(selectedLeaveApplication, LeaveDTO.class);
-        leaveTicketDTO.setIssuedBy(selectedLeaveApplication.getUser().getUsername());
-        leaveTicketDTO.setApprovedBy(selectedLeaveApplication.getApprover() == null ? "-" : selectedLeaveApplication.getApprover().getUsername());
-        return leaveTicketDTO;
+        LeaveDTO leaveApplicationDTO = modelMapper.map(selectedLeaveApplication, LeaveDTO.class);
+        leaveApplicationDTO.setIssuedBy(selectedLeaveApplication.getUser().getUsername());
+        leaveApplicationDTO.setApprovedBy(selectedLeaveApplication.getApprover() == null ? "-" : selectedLeaveApplication.getApprover().getUsername());
+        return leaveApplicationDTO;
     }
 
     @Transactional
     @Override
     public void addLeaveApplication(Long employeeId, LeaveDTO leaveDTO) {
         User applicant = userRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee with id: " + employeeId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Data karyawan dengan id: " + employeeId + " tidak ditemukan!"));
 
         try {
-            LeaveApplication leaveTicket = new LeaveApplication();
-            leaveTicket.setType(leaveDTO.getType());
-            leaveTicket.setStartDate(leaveDTO.getStartDate());
-            leaveTicket.setEndDate(leaveDTO.getEndDate());
-            leaveTicket.setDescription(leaveDTO.getDescription());
-            leaveTicket.setStatus(ApprovalStatusEnum.PENDING);
-            leaveTicket.setUser(applicant);
-            leaveTicket.setStore(applicant.getStore());
-            leaveApplicationRepository.save(leaveTicket);
+            LeaveApplication leaveApplication = new LeaveApplication();
+            leaveApplication.setType(leaveDTO.getType());
+            leaveApplication.setStartDate(leaveDTO.getStartDate());
+            leaveApplication.setEndDate(leaveDTO.getEndDate());
+            leaveApplication.setDescription(leaveDTO.getDescription());
+            leaveApplication.setStatus(ApprovalStatusEnum.PENDING);
+            leaveApplication.setUser(applicant);
+            leaveApplication.setStore(applicant.getStore());
+            leaveApplicationRepository.save(leaveApplication);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add new Leave Ticket!");
+            throw new InternalServerErrorException("Gagal menambahkan pengajuan perizinan baru!");
         }
     }
 
@@ -146,13 +146,13 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Override
     public void updateLeaveApplication(Long leaveId, String approverName, String approvalStatus) {
         LeaveApplication selectedLeaveApplication = leaveApplicationRepository.findById(leaveId)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave Ticket with id: " + leaveId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan perizinan dengan id: " + leaveId + " tidak ditemukan!"));
         User approver = userRepository.findByUsernameAndIsActiveTrue(approverName)
-                .orElseThrow(() -> new ResourceNotFoundException("Approver with name: " + approverName + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Approver dengan nama: " + approverName + " tidak ditemukan!"));
         User applicant = selectedLeaveApplication.getUser();
 
         try {
-            // Leave Ticket will get updated based on approval type that been set.
+            // Leave Application will get updated based on approval type that been set.
             selectedLeaveApplication.setStatus(ApprovalStatusEnum.valueOf(approvalStatus));
             selectedLeaveApplication.setApprover(approver);
             selectedLeaveApplication.setUpdatedDate(LocalDateTime.now());
@@ -176,12 +176,12 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
 
             // Write Audit Log if approver has role as ADMIN
             if (approver.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = approver.getUsername() + " is " + approvalStatus + " a leave application with date: " + selectedLeaveApplication.getStartDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " - " + selectedLeaveApplication.getEndDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + ", issued by: " + applicant.getUsername();
+                String activityDescription = approver.getUsername() + " melakukan " + approvalStatus + " pada pengajuan perizinan dengan tanggal " + selectedLeaveApplication.getStartDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " - " + selectedLeaveApplication.getEndDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " yang dilakukan oleh " + applicant.getUsername();
                 activityLogService.addActivityLog(approver, "UPDATE", "Update Leave Application", "LeaveApplication", activityDescription);
             }
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to update leave ticket!" + e.getMessage());
+            throw new InternalServerErrorException("Gagal mengubah pengajuan perizinan!");
         }
     }
 
@@ -189,17 +189,17 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Override
     public void deleteLeaveApplication(Long leaveId) {
         LeaveApplication selectedLeaveApplication = leaveApplicationRepository.findById(leaveId)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave Application with id: " + leaveId + " is not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pengajuan perizinan dengan id: " + leaveId + " tidak ditemukan!"));
 
         if (selectedLeaveApplication.getStatus() != ApprovalStatusEnum.PENDING) {
-            throw new BadRequestException("Delete action can't be perform on application with APPROVED or REJECTED status!");
+            throw new BadRequestException("Tidak bisa menghapus pengajuan dengan status APPROVED atau REJECTED!");
         }
 
         try {
             leaveApplicationRepository.delete(selectedLeaveApplication);
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to delete Leave Application!");
+            throw new InternalServerErrorException("Gagal menghapus pengajuan perizinan!");
         }
     }
 }

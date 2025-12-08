@@ -25,19 +25,19 @@ public class ScheduleController {
     @PostMapping("/{storeId}")
     public ResponseEntity<?> addSchedule(@PathVariable Long storeId,@RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
         scheduleService.addSchedule(storeId, currentLoggedIn, scheduleDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "New Schedule has been added!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data jadwal kerja baru berhasil ditambahkan!"));
     }
 
     @PutMapping("/{scheduleId}")
     public ResponseEntity<?> updateSchedule(@PathVariable Long scheduleId, @RequestParam String currentLoggedIn, @RequestBody ScheduleDTO scheduleDTO) {
         scheduleService.updateSchedule(scheduleId, currentLoggedIn, scheduleDTO);
-        return ResponseEntity.ok(new MessageResponse(true, "Schedule has been updated!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data jadwal kerja berhasil diubah!"));
     }
 
     @PreAuthorize("hasRole('OWNER')")
     @DeleteMapping("/{scheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId) {
         scheduleService.deleteSchedule(scheduleId);
-        return ResponseEntity.ok(new MessageResponse(true, "Schedule has been deleted!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data jadwal kerja berhasil dihapus!"));
     }
 }
