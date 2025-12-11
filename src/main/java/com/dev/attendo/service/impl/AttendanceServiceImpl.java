@@ -324,21 +324,20 @@ public class AttendanceServiceImpl implements AttendanceService {
     public void updateAttendance(Long attendanceId, String currentLoggedIn, String attendanceStatus, int deductionAmount, String attendanceDescription) {
         Attendance selectedAttendance = attendanceRepository.findById(attendanceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Data presensi dengan id: " + attendanceId + " tidak ditemukan!"));
-
-        // CHANGE
         User selectedCurrentLoggedIn = userRepository.findByUsernameAndIsActiveTrue(currentLoggedIn)
                 .orElseThrow(() -> new ResourceNotFoundException("User dengan username: " + currentLoggedIn + " tidak ditemukan!"));
 
         try {
-            if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = selectedCurrentLoggedIn.getUsername() + " mengubah data presensi milik " + selectedAttendance.getUser().getUsername() + " pada " + selectedAttendance.getClockIn().toLocalDate();
-                activityLogService.addActivityLog(selectedCurrentLoggedIn, "UPDATE", "Update Attendance", "Attendance", activityDescription);
-            }
             selectedAttendance.setDescription(attendanceDescription);
             selectedAttendance.setStatus(AttendanceStatusEnum.valueOf(attendanceStatus));
             selectedAttendance.setDeductionAmount(deductionAmount);
             selectedAttendance.setUpdatedDate(LocalDateTime.now());
             attendanceRepository.save(selectedAttendance);
+
+            if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
+                String activityDescription = selectedCurrentLoggedIn.getUsername() + " mengubah data presensi milik " + selectedAttendance.getUser().getUsername() + " pada " + selectedAttendance.getClockIn().toLocalDate();
+                activityLogService.addActivityLog(selectedCurrentLoggedIn, "UPDATE", "Update Presensi", "Presensi", activityDescription);
+            }
 
         } catch (Exception e) {
             throw new InternalServerErrorException("Gagal mengubah data presensi!");
@@ -356,7 +355,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         try {
             if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = selectedCurrentLoggedIn.getUsername() + " menghapus data presensi milik " + selectedAttendance.getUser().getUsername() + " pada " + selectedAttendance.getClockIn().toLocalDate();
-                activityLogService.addActivityLog(selectedCurrentLoggedIn, "DELETE", "Remove Attendance", "Attendance", activityDescription);
+                activityLogService.addActivityLog(selectedCurrentLoggedIn, "DELETE", "Hapus Presensi", "Presensi", activityDescription);
             }
             attendanceRepository.delete(selectedAttendance);
 

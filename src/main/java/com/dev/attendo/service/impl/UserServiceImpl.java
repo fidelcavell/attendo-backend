@@ -244,7 +244,7 @@ public class UserServiceImpl implements UserService {
 
             if (loggedInUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = "Menambahkan data karyawan baru dengan username: " + username + " ke dalam toko: " + selectedStore.getName() + " dengan jumlah gaji sebesar Rp." + salaryAmount;
-                activityLogService.addActivityLog(loggedInUser, "ADD", "Add new employee to Store", "User", activityDescription);
+                activityLogService.addActivityLog(loggedInUser, "ADD", "Tambah Data Karyawan Baru kedalam Toko", "User", activityDescription);
             }
 
         } catch (Exception e) {

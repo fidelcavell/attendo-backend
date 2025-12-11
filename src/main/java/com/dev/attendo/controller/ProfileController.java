@@ -35,8 +35,8 @@ public class ProfileController {
             @RequestParam(defaultValue = "", required = false) String keyword,
             @RequestParam(defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(defaultValue = "5", required = false) Integer pageSize,
-            @RequestParam(defaultValue = "updatedDate", required = false) String sortBy,
-            @RequestParam(defaultValue = "desc", required = false) String sortOrder
+            @RequestParam(defaultValue = "name", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String sortOrder
     ) {
         ProfilePagination profilePagination = profileService.getAllAssociateEmployee(currentUser, storeId, keyword, pageNumber, pageSize, sortBy, sortOrder);
         return ResponseEntity.ok(profilePagination);

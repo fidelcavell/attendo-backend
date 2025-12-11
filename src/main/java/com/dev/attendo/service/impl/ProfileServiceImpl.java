@@ -163,10 +163,10 @@ public class ProfileServiceImpl implements ProfileService {
             profileRepository.save(selectedProfile);
 
             if (currentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String scheduleTime = schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB" + " - " + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB";
+                String scheduleTime = schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB" + " - " + schedule.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB";
 
                 String activityDescription = currentLoggedIn.getUsername() + " mengubah jadwal kerja pada " + selectedProfile.getUser().getUsername() + " dengan jadwal kerja baru: " + scheduleTime;
-                activityLogService.addActivityLog(currentLoggedIn, "UPDATE", "Update Work Schedule", "Profile", activityDescription);
+                activityLogService.addActivityLog(currentLoggedIn, "UPDATE", "Update Jadwal Kerja Karyawan", "Profile", activityDescription);
             }
 
         } catch (Exception e) {

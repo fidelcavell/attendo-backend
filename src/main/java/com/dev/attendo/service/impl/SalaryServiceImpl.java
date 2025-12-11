@@ -140,7 +140,7 @@ public class SalaryServiceImpl implements SalaryService {
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = currentUser.getUsername() + " menambahkan data gaji baru dengan jumlah sebesar Rp. " + amount + " dan dengan tanggal berlaku pada " + Month.of(targetMonth).name().toLowerCase() + " " + targetYear;
-                activityLogService.addActivityLog(currentUser, "ADD", "Add new salary", "Salary", activityDescription);
+                activityLogService.addActivityLog(currentUser, "ADD", "Tambah Data Gaji Baru", "Gaji", activityDescription);
             }
 
         } catch (Exception e) {

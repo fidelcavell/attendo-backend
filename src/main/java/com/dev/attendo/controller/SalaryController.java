@@ -49,6 +49,6 @@ public class SalaryController {
             @RequestParam int targetYear
     ) {
         salaryService.addNewSalary(userId, currentLoggedIn, salaryAmount, targetMonth, targetYear);
-        return ResponseEntity.ok(new MessageResponse(true, "Data gaji berhasil diubah!"));
+        return ResponseEntity.ok(new MessageResponse(true, "Data gaji berhasil ditambahkan!"));
     }
 }

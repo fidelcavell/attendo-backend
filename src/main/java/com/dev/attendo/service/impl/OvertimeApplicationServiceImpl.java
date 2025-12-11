@@ -188,7 +188,7 @@ public class OvertimeApplicationServiceImpl implements OvertimeApplicationServic
                 String scheduleTime = selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB" + " - " + selectedOvertimeApplication.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " WIB";
 
                 String activityDescription = approver.getUsername() + " melakukan " + approvalStatus + " pada pengajuan lembur dengan tanggal " + selectedOvertimeApplication.getOvertimeDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " dengan jadwal kerja: " + scheduleTime + " yang dilakukan oleh " + applicant.getUsername();
-                activityLogService.addActivityLog(approver, "UPDATE", "Update Overtime Application", "OvertimeApplication", activityDescription);
+                activityLogService.addActivityLog(approver, "UPDATE", "Update Pengajuan Lembur", "Lembur", activityDescription);
             }
 
         } catch (Exception e) {

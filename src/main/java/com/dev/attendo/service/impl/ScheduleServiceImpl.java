@@ -70,8 +70,8 @@ public class ScheduleServiceImpl implements ScheduleService {
             scheduleRepository.save(schedule);
 
             if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = selectedCurrentLoggedIn.getUsername() + " menambahkan jadwal kerja baru dengan nama: " + scheduleDTO.getName() + ", batas keterlambatan: " + scheduleDTO.getLateTolerance() + " minutes dan dengan waktu: " + scheduleDTO.getStartTime() + " hingga " + scheduleDTO.getEndTime();
-                activityLogService.addActivityLog(selectedCurrentLoggedIn, "ADD", "Add new schedule", "Schedule", activityDescription);
+                String activityDescription = selectedCurrentLoggedIn.getUsername() + " menambahkan jadwal kerja baru dengan nama: " + scheduleDTO.getName() + ", batas keterlambatan: " + scheduleDTO.getLateTolerance() + " minutes dan dengan waktu: " + scheduleDTO.getStartTime() + " WIB hingga " + scheduleDTO.getEndTime() + " WIB";
+                activityLogService.addActivityLog(selectedCurrentLoggedIn, "ADD", "Tambah Jadwal Kerja Baru", "Jadwal Kerja", activityDescription);
             }
 
         } catch (Exception e) {
@@ -95,8 +95,8 @@ public class ScheduleServiceImpl implements ScheduleService {
             scheduleRepository.save(selectedSchedule);
 
             if (selectedCurrentLoggedIn.getRole().getName() == RoleEnum.ROLE_ADMIN) {
-                String activityDescription = selectedCurrentLoggedIn.getUsername() + " mengubah data jadwal kerja " + scheduleDTO.getName() + " dengan waktu: " + scheduleDTO.getStartTime() + " hingga " + scheduleDTO.getEndTime();
-                activityLogService.addActivityLog(selectedCurrentLoggedIn, "UPDATE", "Add new schedule", "Schedule", activityDescription);
+                String activityDescription = selectedCurrentLoggedIn.getUsername() + " mengubah data jadwal kerja " + scheduleDTO.getName() + " dengan waktu: " + scheduleDTO.getStartTime() + " WIB hingga " + scheduleDTO.getEndTime() + " WIB";
+                activityLogService.addActivityLog(selectedCurrentLoggedIn, "UPDATE", "Update Jadwal Kerja", "Jadwal Kerja", activityDescription);
             }
 
         } catch (Exception e) {

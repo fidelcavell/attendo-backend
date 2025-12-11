@@ -116,7 +116,7 @@ public class LoanServiceImpl implements LoanService {
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = currentUser.getUsername() + " menambahkan data peminjaman uang baru pada " + selectedUser.getUsername() + " dengan jumlah sebesar Rp. " + newLoanAmount;
-                activityLogService.addActivityLog(currentUser, "ADD", "Add new loan", "Loan", activityDescription);
+                activityLogService.addActivityLog(currentUser, "ADD", "Tambah Peminjaman Uang Baru", "Peminjaman Uang", activityDescription);
             }
 
         } catch (Exception e) {
@@ -158,7 +158,7 @@ public class LoanServiceImpl implements LoanService {
 
             if (currentUser.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = currentUser.getUsername() + " mengubah data peminjaman uang milik " + selectedLoan.getUser().getUsername() +  " pada " + currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " dengan jumlah sebesar Rp. " + newLoanAmount;
-                activityLogService.addActivityLog(currentUser, "UPDATE", "Update Loan", "Loan", activityDescription);
+                activityLogService.addActivityLog(currentUser, "UPDATE", "Update Peminjaman Uang", "Peminjaman Uang", activityDescription);
             }
 
         } catch (Exception e) {

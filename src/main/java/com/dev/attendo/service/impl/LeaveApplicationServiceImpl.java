@@ -174,10 +174,9 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
                 }
             }
 
-            // Write Audit Log if approver has role as ADMIN
             if (approver.getRole().getName() == RoleEnum.ROLE_ADMIN) {
                 String activityDescription = approver.getUsername() + " melakukan " + approvalStatus + " pada pengajuan perizinan dengan tanggal " + selectedLeaveApplication.getStartDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " - " + selectedLeaveApplication.getEndDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) + " yang dilakukan oleh " + applicant.getUsername();
-                activityLogService.addActivityLog(approver, "UPDATE", "Update Leave Application", "LeaveApplication", activityDescription);
+                activityLogService.addActivityLog(approver, "UPDATE", "Update Pengajuan Perizinan", "Perizinan", activityDescription);
             }
 
         } catch (Exception e) {
